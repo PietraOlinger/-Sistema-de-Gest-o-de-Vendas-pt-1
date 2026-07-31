@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parfum féminin</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Parfum féminin</h1>
+        <p>Descubra perfumes femininos sofisticados e irresistíveis.</p>
+    </header>
+
+    <main>
+        <h2>Catálogo de Perfumes</h2>
+        <div id="catalogo"></div>
+
+        <hr>
+
+        <h2>Calculadora de Desconto</h2>
+        <input type="number" id="valor" placeholder="Valor da compra">
+        <input type="number" id="desconto" placeholder="Desconto (%)">
+        <button onclick="calcularDesconto()">Calcular</button>
+        <p id="resultado"></p>
+
+        <hr>
+
+        <h2>Consultar CEP</h2>
+        <input type="text" id="cep" placeholder="Digite o CEP">
+        <button onclick="buscarCEP()">Buscar</button>
+        <p id="endereco"></p>
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
