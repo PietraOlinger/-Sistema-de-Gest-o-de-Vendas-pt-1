@@ -1,0 +1,12 @@
+{
+  "name": "sistema-gestao-vendas-parte-2",
+  "version": "2.0.0",
+  "description": "Sistema de Gestão de Vendas - Atividade Unidade 2",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "cli": "node cli.js"
+  },
+  "author": "Pietra Olinger",
+  "license": "GPL-3.0"
+}

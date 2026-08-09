@@ -1,0 +1,33 @@
+[
+  {
+    "id": 1,
+    "nome": "Too Scandal",
+    "preco": 389,
+    "categoria": "Perfume feminino",
+    "tipo": "Perfume",
+    "imagem": "",
+    "concentracao": "Eau de Parfum",
+    "descricao": "Too Scandal - Eau de Parfum"
+  },
+  {
+    "id": 2,
+    "nome": "Good Girl",
+    "preco": 499,
+    "categoria": "Perfume feminino",
+    "tipo": "Perfume",
+    "imagem": "",
+    "concentracao": "Eau de Parfum",
+    "descricao": "Good Girl - Eau de Parfum"
+  },
+  {
+    "id": 3,
+    "nome": "Lady Million",
+    "preco": 459,
+    "categoria": "Perfume feminino",
+    "tipo": "Perfume",
+    "imagem": "",
+    "concentracao": "Eau de Parfum",
+    "descricao": "Lady Million - Eau de Parfum"
+  }
+]
+

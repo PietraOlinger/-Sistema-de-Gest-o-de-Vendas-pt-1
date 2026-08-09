@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Sistema de Gestão de Vendas
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+</head>
+
+<body>
+
+  <header>
+    <h1>Parfum féminin</h1>
+
+    <p>
+      Sistema de Gestão de Vendas - Parte 2
+    </p>
+  </header>
+
+  <main>
+
+    <section>
+      <h2>Produtos</h2>
+
+      <p id="media">
+        Calculando média...
+      </p>
+
+      <div id="catalogo"></div>
+    </section>
+
+    <section>
+      <h2>Cadastrar Produto</h2>
+
+      <form id="formProduto">
+
+        <label>
+          Nome
+          <input
+            id="produtoNome"
+            required
+          >
+        </label>
+        <label>
+          Preço
+          <input
+            id="produtoPreco"
+            type="number"
+            step="0.01"
+            required
+          >
+        </label>
+
+        <label>
+          Categoria
+          <input
+            id="produtoCategoria"
+            value="Perfume feminino"
+          >
+        </label>
+
+        <label>
+          Concentração
+
+          <select id="produtoConcentracao">
+            <option>Eau de Parfum</option>
+
+            <option>Eau de Toilette</option>
+
+            <option>Parfum</option>
+          </select>
+        </label>
+
+        <label>
+          URL da imagem
+          <input id="produtoImagem">
+        </label>
+
+        <button type="submit">
+          Cadastrar
+        </button>
+
+      </form>
+
+      <p id="produtoMsg"></p>
+    </section>
+
+    <section>
+      <h2>Calculadora de Desconto</h2>
+
+      <form id="formDesconto">
+
+        <label>
+          Valor da compra
+
+          <input
+            id="valor"
+            type="number"
+            step="0.01"
+            required
+          >
+        </label>
+
+        <label>
+          Desconto %
+
+          <input
+            id="desconto"
+            type="number"
+            required
+          >
+        </label>
+
+        <button type="submit">
+          Calcular
+        </button>
+
+      </form>
+
+      <p id="resultado"></p>
+    </section>
+
+    <section>
+      <h2>Consultar CEP</h2>
+
+      <form id="formCep">
+
+        <label>
+          CEP
+
+          <input
+            id="cep"
+            maxlength="9"
+            required
+          >
+        </label>
+
+        <button type="submit">
+          Consultar
+        </button>
+
+      </form>
+
+      <div id="endereco"></div>
+    </section>
+
+    <section>
+      <h2>Criar Pedido</h2>
+
+      <form id="formPedido">
+
+        <label>
+          Cliente
+
+          <input
+            id="cliente"
+            required
+          >
+        </label>
+
+        <label>
+          CEP
+
+          <input
+            id="pedidoCep"
+            required
+          >
+        </label>
+
+        <label>
+          Produto
+
+          <select
+            id="pedidoProduto"
+            required
+          ></select>
+        </label>
+
+        <label>
+          Quantidade
+
+          <input
+            id="quantidade"
+            type="number"
+            min="1"
+            value="1"
+            required
+          >
+        </label>
+
+        <button type="submit">
+          Salvar Pedido
+        </button>
+
+      </form>
+
+      <div id="pedidoMsg"></div>
+    </section>
+
+    <section>
+      <h2>Pedidos Salvos</h2>
+
+      <div id="pedidos"></div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
