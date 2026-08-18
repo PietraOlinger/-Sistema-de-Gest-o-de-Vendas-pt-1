@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "cliente": "Maria Silva",
+    "produto": "Good Girl",
+    "quantidade": 1,
+    "valorUnitario": 499,
+    "total": 499,
+    "status": "Concluído",
+    "data": "2026-08-15T12:00:00.000Z"
+  }
+]

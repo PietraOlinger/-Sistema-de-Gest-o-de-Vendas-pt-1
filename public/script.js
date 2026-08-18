@@ -1,345 +1,943 @@
-const catalogo =
-  document.getElementById("catalogo");
+const API_PRODUTOS = "/api/produtos";
+const API_PEDIDOS = "/api/pedidos";
 
-const selectPedido =
-  document.getElementById("pedidoProduto");
+let produtos = [];
+let pedidos = [];
 
-function moeda(valor) {
-  return Number(valor).toLocaleString(
-    "pt-BR",
-    {
-      style: "currency",
-      currency: "BRL"
-    }
-  );
-}
+// =====================================
+// INICIAR SISTEMA
+// =====================================
 
-async function api(url, opcoes = {}) {
-  const resposta = await fetch(
-    url,
-    {
-      headers: {
-        "Content-Type": "application/json"
-      },
-      ...opcoes
-    }
-  );
+document.addEventListener("DOMContentLoaded", async () => {
+    await carregarProdutos();
+    await carregarPedidos();
+});
 
-  const dados = await resposta.json();
-
-  if (!resposta.ok) {
-    throw new Error(
-      dados.erro || "Erro na requisição."
-    );
-  }
-
-  return dados;
-}
+// =====================================
+// PRODUTOS - READ
+// =====================================
 
 async function carregarProdutos() {
-  try {
-    const produtos =
-      await api("/api/produtos");
+    try {
+        const resposta = await fetch(API_PRODUTOS);
+
+        if (!resposta.ok) {
+            throw new Error("Erro ao carregar produtos.");
+        }
+
+        produtos = await resposta.json();
+
+        exibirCatalogo();
+        exibirTabelaProdutos();
+        preencherSelectProdutos();
+
+    } catch (erro) {
+        console.error(erro);
+
+        alert("Não foi possível carregar os produtos.");
+    }
+}
+
+// =====================================
+// EXIBIR CATÁLOGO
+// =====================================
+
+function exibirCatalogo() {
+    const catalogo =
+        document.getElementById("lista-catalogo");
 
     catalogo.innerHTML = "";
 
-    selectPedido.innerHTML = "";
+    if (produtos.length === 0) {
+        catalogo.innerHTML = `
+            <p class="mensagem-vazia">
+                Nenhum produto cadastrado.
+            </p>
+        `;
 
-    produtos.forEach(produto => {
-      const card =
-        document.createElement("div");
+        return;
+    }
 
-      card.className = "produto";
+    produtos.forEach((produto) => {
 
-      card.innerHTML = `
-        <h3>${produto.nome}</h3>
+        const imagem =
+            produto.imagem ||
+            "https://via.placeholder.com/250?text=Perfume";
 
-        <p>
-          ${produto.descricao}
-        </p>
+        catalogo.innerHTML += `
+            <article class="produto">
 
-        <strong>
-          ${moeda(produto.preco)}
-        </strong>
-      `;
+                <img
+                    src="${imagem}"
+                    alt="${produto.nome}"
+                    onerror="
+                        this.src='https://via.placeholder.com/250?text=Perfume'
+                    "
+                >
 
-      catalogo.appendChild(card);
+                <h3>${produto.nome}</h3>
 
-      const option =
-        document.createElement("option");
+                <p class="preco">
+                    ${formatarMoeda(produto.preco)}
+                </p>
 
-      option.value = produto.id;
+                <p>
+                    ${produto.categoria}
+                </p>
 
-      option.textContent =
-        `${produto.nome} - ${moeda(produto.preco)}`;
+                <p class="estoque">
+                    Estoque: ${produto.estoque}
+                </p>
 
-      selectPedido.appendChild(option);
+            </article>
+        `;
+    });
+}
+
+// =====================================
+// TABELA DE PRODUTOS
+// =====================================
+
+function exibirTabelaProdutos() {
+    const tabela =
+        document.getElementById("tabela-produtos");
+
+    tabela.innerHTML = "";
+
+    if (produtos.length === 0) {
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="6">
+                    Nenhum produto cadastrado.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    produtos.forEach((produto) => {
+
+        tabela.innerHTML += `
+            <tr>
+
+                <td>${produto.id}</td>
+
+                <td>${produto.nome}</td>
+
+                <td>
+                    ${formatarMoeda(produto.preco)}
+                </td>
+
+                <td>
+                    ${produto.categoria}
+                </td>
+
+                <td>
+                    ${produto.estoque}
+                </td>
+
+                <td>
+
+                    <button
+                        class="botao-editar"
+                        onclick="editarProduto(${produto.id})"
+                    >
+                        Editar
+                    </button>
+
+                    <button
+                        class="botao-excluir"
+                        onclick="excluirProduto(${produto.id})"
+                    >
+                        Excluir
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+    });
+}
+
+// =====================================
+// PRODUTOS - CREATE / UPDATE
+// =====================================
+
+document
+    .getElementById("form-produto")
+    .addEventListener("submit", async (evento) => {
+
+        evento.preventDefault();
+
+        const id =
+            document.getElementById("produto-id").value;
+
+        const dadosProduto = {
+            nome:
+                document.getElementById(
+                    "produto-nome"
+                ).value.trim(),
+
+            preco:
+                Number(
+                    document.getElementById(
+                        "produto-preco"
+                    ).value
+                ),
+
+            categoria:
+                document.getElementById(
+                    "produto-categoria"
+                ).value.trim(),
+
+            estoque:
+                Number(
+                    document.getElementById(
+                        "produto-estoque"
+                    ).value
+                ),
+
+            imagem:
+                document.getElementById(
+                    "produto-imagem"
+                ).value.trim()
+        };
+
+        try {
+
+            let resposta;
+
+            if (id) {
+
+                // UPDATE
+
+                resposta = await fetch(
+                    `${API_PRODUTOS}/${id}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            dadosProduto
+                        )
+                    }
+                );
+
+            } else {
+
+                // CREATE
+
+                resposta = await fetch(
+                    API_PRODUTOS,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            dadosProduto
+                        )
+                    }
+                );
+
+            }
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(dados.mensagem);
+            }
+
+            alert(dados.mensagem);
+
+            cancelarEdicaoProduto();
+
+            await carregarProdutos();
+
+        } catch (erro) {
+
+            alert(
+                erro.message ||
+                "Erro ao salvar produto."
+            );
+
+        }
     });
 
-    const dadosMedia =
-      await api("/api/produtos/media");
+// =====================================
+// EDITAR PRODUTO
+// =====================================
+
+function editarProduto(id) {
+    const produto = produtos.find(
+        (item) => Number(item.id) === Number(id)
+    );
+
+    if (!produto) {
+        return;
+    }
 
     document.getElementById(
-      "media"
-    ).textContent =
-      `Média dos preços: ${moeda(
-        dadosMedia.media
-      )}`;
-  } catch (erro) {
-    console.error(erro);
-  }
+        "produto-id"
+    ).value = produto.id;
+
+    document.getElementById(
+        "produto-nome"
+    ).value = produto.nome;
+
+    document.getElementById(
+        "produto-preco"
+    ).value = produto.preco;
+
+    document.getElementById(
+        "produto-categoria"
+    ).value = produto.categoria;
+
+    document.getElementById(
+        "produto-estoque"
+    ).value = produto.estoque;
+
+    document.getElementById(
+        "produto-imagem"
+    ).value = produto.imagem || "";
+
+    document.getElementById(
+        "titulo-form-produto"
+    ).textContent = "Editar Produto";
+
+    document
+        .getElementById("gerenciar-produtos")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
 }
 
-async function carregarPedidos() {
-  const container =
-    document.getElementById("pedidos");
+// =====================================
+// CANCELAR EDIÇÃO PRODUTO
+// =====================================
 
-  try {
-    const pedidos =
-      await api("/api/pedidos");
+function cancelarEdicaoProduto() {
 
-    if (pedidos.length === 0) {
-      container.innerHTML =
-        "<p>Nenhum pedido salvo.</p>";
+    document
+        .getElementById("form-produto")
+        .reset();
 
-      return;
+    document.getElementById(
+        "produto-id"
+    ).value = "";
+
+    document.getElementById(
+        "produto-categoria"
+    ).value = "Perfume feminino";
+
+    document.getElementById(
+        "titulo-form-produto"
+    ).textContent = "Cadastrar Produto";
+}
+
+// =====================================
+// PRODUTOS - DELETE
+// =====================================
+
+async function excluirProduto(id) {
+
+    const confirmar = confirm(
+        "Deseja realmente excluir este produto?"
+    );
+
+    if (!confirmar) {
+        return;
     }
 
-    container.innerHTML = pedidos
-      .map(pedido => {
-        return `
-          <div class="pedido">
+    try {
 
-            <strong>
-              Pedido ${pedido.id}
-            </strong>
-
-            <p>
-              Cliente: ${pedido.cliente}
-            </p>
-
-            <p>
-              Total: ${moeda(pedido.total)}
-            </p>
-
-            <p>
-              ${pedido.endereco.cidade}
-              -
-              ${pedido.endereco.uf}
-            </p>
-
-          </div>
-        `;
-      })
-      .join("");
-  } catch (erro) {
-    console.error(erro);
-  }
-}
-
-document
-  .getElementById("formProduto")
-  .addEventListener(
-    "submit",
-    async evento => {
-      evento.preventDefault();
-
-      const msg =
-        document.getElementById(
-          "produtoMsg"
+        const resposta = await fetch(
+            `${API_PRODUTOS}/${id}`,
+            {
+                method: "DELETE"
+            }
         );
 
-      try {
-        const produto =
-          await api(
-            "/api/produtos",
-            {
-              method: "POST",
+        const dados = await resposta.json();
 
-              body: JSON.stringify({
-                tipo: "perfume",
+        if (!resposta.ok) {
+            throw new Error(dados.mensagem);
+        }
 
-                nome:
-                  document.getElementById(
-                    "produtoNome"
-                  ).value,
-
-                preco:
-                  document.getElementById(
-                    "produtoPreco"
-                  ).value,
-
-                categoria:
-                  document.getElementById(
-                    "produtoCategoria"
-                  ).value,
-
-                concentracao:
-                  document.getElementById(
-                    "produtoConcentracao"
-                  ).value,
-
-                imagem:
-                  document.getElementById(
-                    "produtoImagem"
-                  ).value
-              })
-            }
-          );
-
-        msg.textContent =
-          `${produto.nome} cadastrado com sucesso!`;
-
-        evento.target.reset();
+        alert(dados.mensagem);
 
         await carregarProdutos();
-      } catch (erro) {
-        msg.textContent =
-          erro.message;
-      }
+
+    } catch (erro) {
+
+        alert(
+            erro.message ||
+            "Erro ao excluir produto."
+        );
+
     }
-  );
-document
-  .getElementById("formDesconto")
-  .addEventListener(
-    "submit",
-    evento => {
-      evento.preventDefault();
+}
 
-      const valor =
-        Number(
-          document.getElementById(
-            "valor"
-          ).value
-        );
+// =====================================
+// SELECT DE PRODUTOS DO PEDIDO
+// =====================================
 
-      const desconto =
-        Number(
-          document.getElementById(
-            "desconto"
-          ).value
-        );
+function preencherSelectProdutos() {
+    const select =
+        document.getElementById("pedido-produto");
 
-      const valorFinal =
-        valor -
-        valor * desconto / 100;
+    const valorAtual = select.value;
 
-      document.getElementById(
-        "resultado"
-      ).textContent =
-        `Valor final: ${moeda(valorFinal)}`;
+    select.innerHTML = `
+        <option value="">
+            Selecione um produto
+        </option>
+    `;
+
+    produtos.forEach((produto) => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = produto.id;
+
+        option.textContent =
+            `${produto.nome} - ${formatarMoeda(produto.preco)}`;
+
+        select.appendChild(option);
+    });
+
+    if (valorAtual) {
+        select.value = valorAtual;
     }
-  );
+}
 
-document
-  .getElementById("formCep")
-  .addEventListener(
-    "submit",
-    async evento => {
-      evento.preventDefault();
+// =====================================
+// PEDIDOS - READ
+// =====================================
 
-      const cep =
-        document.getElementById(
-          "cep"
-        ).value;
+async function carregarPedidos() {
 
-      const endereco =
-        document.getElementById(
-          "endereco"
+    try {
+
+        const resposta =
+            await fetch(API_PEDIDOS);
+
+        if (!resposta.ok) {
+            throw new Error(
+                "Erro ao carregar pedidos."
+            );
+        }
+
+        pedidos = await resposta.json();
+
+        exibirTabelaPedidos();
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        alert(
+            "Não foi possível carregar os pedidos."
         );
 
-      try {
-        const dados =
-          await api(
-            `/api/cep/${cep}`
-          );
+    }
+}
 
-        endereco.innerHTML = `
-          <p>
-            ${dados.logradouro}
-          </p>
+// =====================================
+// TABELA DE PEDIDOS
+// =====================================
 
-          <p>
-            ${dados.bairro}
-          </p>
+function exibirTabelaPedidos() {
 
-          <p>
-            ${dados.cidade}
-            -
-            ${dados.uf}
-          </p>
+    const tabela =
+        document.getElementById("tabela-pedidos");
+
+    tabela.innerHTML = "";
+
+    if (pedidos.length === 0) {
+
+        tabela.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    Nenhum pedido cadastrado.
+                </td>
+            </tr>
         `;
-      } catch (erro) {
-        endereco.textContent =
-          erro.message;
-      }
+
+        return;
     }
-  );
+
+    pedidos.forEach((pedido) => {
+
+        tabela.innerHTML += `
+            <tr>
+
+                <td>
+                    ${pedido.id}
+                </td>
+
+                <td>
+                    ${pedido.cliente}
+                </td>
+
+                <td>
+                    ${pedido.produto}
+                </td>
+
+                <td>
+                    ${pedido.quantidade}
+                </td>
+
+                <td>
+                    ${formatarMoeda(pedido.total)}
+                </td>
+
+                <td>
+                    <span class="status">
+                        ${pedido.status}
+                    </span>
+                </td>
+
+                <td>
+
+                    <button
+                        class="botao-editar"
+                        onclick="editarPedido(${pedido.id})"
+                    >
+                        Editar
+                    </button>
+
+                    <button
+                        class="botao-excluir"
+                        onclick="excluirPedido(${pedido.id})"
+                    >
+                        Excluir
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+    });
+}
+
+// =====================================
+// PEDIDOS - CREATE / UPDATE
+// =====================================
 
 document
-  .getElementById("formPedido")
-  .addEventListener(
-    "submit",
-    async evento => {
-      evento.preventDefault();
+    .getElementById("form-pedido")
+    .addEventListener("submit", async (evento) => {
 
-      const msg =
+        evento.preventDefault();
+
+        const id =
+            document.getElementById(
+                "pedido-id"
+            ).value;
+
+        const produtoId =
+            document.getElementById(
+                "pedido-produto"
+            ).value;
+
+        const produtoSelecionado =
+            produtos.find(
+                (produto) =>
+                    Number(produto.id) ===
+                    Number(produtoId)
+            );
+
+        if (!produtoSelecionado) {
+
+            alert("Selecione um produto.");
+
+            return;
+        }
+
+        const dadosPedido = {
+
+            cliente:
+                document.getElementById(
+                    "pedido-cliente"
+                ).value.trim(),
+
+            produto:
+                produtoSelecionado.nome,
+
+            quantidade:
+                Number(
+                    document.getElementById(
+                        "pedido-quantidade"
+                    ).value
+                ),
+
+            valorUnitario:
+                Number(
+                    produtoSelecionado.preco
+                ),
+
+            status:
+                document.getElementById(
+                    "pedido-status"
+                ).value
+        };
+
+        try {
+
+            let resposta;
+
+            if (id) {
+
+                resposta = await fetch(
+                    `${API_PEDIDOS}/${id}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            dadosPedido
+                        )
+                    }
+                );
+
+            } else {
+
+                resposta = await fetch(
+                    API_PEDIDOS,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            dadosPedido
+                        )
+                    }
+                );
+
+            }
+
+            const dados =
+                await resposta.json();
+
+            if (!resposta.ok) {
+
+                throw new Error(
+                    dados.mensagem
+                );
+
+            }
+
+            alert(dados.mensagem);
+
+            cancelarEdicaoPedido();
+
+            await carregarPedidos();
+
+        } catch (erro) {
+
+            alert(
+                erro.message ||
+                "Erro ao salvar pedido."
+            );
+
+        }
+    });
+
+// =====================================
+// EDITAR PEDIDO
+// =====================================
+
+function editarPedido(id) {
+
+    const pedido = pedidos.find(
+        (item) =>
+            Number(item.id) === Number(id)
+    );
+
+    if (!pedido) {
+        return;
+    }
+
+    const produto = produtos.find(
+        (item) =>
+            item.nome === pedido.produto
+    );
+
+    document.getElementById(
+        "pedido-id"
+    ).value = pedido.id;
+
+    document.getElementById(
+        "pedido-cliente"
+    ).value = pedido.cliente;
+
+    if (produto) {
+
         document.getElementById(
-          "pedidoMsg"
+            "pedido-produto"
+        ).value = produto.id;
+
+    }
+
+    document.getElementById(
+        "pedido-quantidade"
+    ).value = pedido.quantidade;
+
+    document.getElementById(
+        "pedido-status"
+    ).value = pedido.status;
+
+    document.getElementById(
+        "titulo-form-pedido"
+    ).textContent = "Editar Pedido";
+
+    document
+        .getElementById("gerenciar-pedidos")
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+}
+
+// =====================================
+// CANCELAR EDIÇÃO PEDIDO
+// =====================================
+
+function cancelarEdicaoPedido() {
+
+    document
+        .getElementById("form-pedido")
+        .reset();
+
+    document.getElementById(
+        "pedido-id"
+    ).value = "";
+
+    document.getElementById(
+        "pedido-quantidade"
+    ).value = 1;
+
+    document.getElementById(
+        "pedido-status"
+    ).value = "Pendente";
+
+    document.getElementById(
+        "titulo-form-pedido"
+    ).textContent = "Cadastrar Pedido";
+}
+
+// =====================================
+// PEDIDOS - DELETE
+// =====================================
+
+async function excluirPedido(id) {
+
+    const confirmar = confirm(
+        "Deseja realmente excluir este pedido?"
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+
+        const resposta = await fetch(
+            `${API_PEDIDOS}/${id}`,
+            {
+                method: "DELETE"
+            }
         );
 
-      try {
-        const pedido =
-          await api(
-            "/api/pedidos",
-            {
-              method: "POST",
+        const dados =
+            await resposta.json();
 
-              body: JSON.stringify({
-                cliente:
-                  document.getElementById(
-                    "cliente"
-                  ).value,
+        if (!resposta.ok) {
 
-                cep:
-                  document.getElementById(
-                    "pedidoCep"
-                  ).value,
+            throw new Error(
+                dados.mensagem
+            );
 
-                itens: [
-                  {
-                    produtoId:
-                      document.getElementById(
-                        "pedidoProduto"
-                      ).value,
+        }
 
-                    quantidade:
-                      Number(
-                        document.getElementById(
-                          "quantidade"
-                        ).value
-                      )
-                  }
-                ]
-              })
-            }
-          );
-
-        msg.textContent =
-          `Pedido salvo! Total: ${moeda(
-            pedido.total
-          )}`;
-
-        evento.target.reset();
+        alert(dados.mensagem);
 
         await carregarPedidos();
-      } catch (erro) {
-        msg.textContent =
-          erro.message;
-      }
+
+    } catch (erro) {
+
+        alert(
+            erro.message ||
+            "Erro ao excluir pedido."
+        );
+
     }
-  );
+}
 
-carregarProdutos();
+// =====================================
+// CALCULADORA DE DESCONTO
+// =====================================
 
-carregarPedidos();
+function calcularDesconto() {
+
+    const valor = Number(
+        document.getElementById(
+            "valor"
+        ).value
+    );
+
+    const desconto = Number(
+        document.getElementById(
+            "desconto-valor"
+        ).value
+    );
+
+    if (
+        valor <= 0 ||
+        desconto < 0 ||
+        desconto > 100
+    ) {
+
+        document.getElementById(
+            "resultado"
+        ).innerHTML =
+            "Digite valores válidos.";
+
+        return;
+    }
+
+    const valorDesconto =
+        valor * desconto / 100;
+
+    const total =
+        valor - valorDesconto;
+
+    document.getElementById(
+        "resultado"
+    ).innerHTML = `
+        Valor original:
+        <strong>
+            ${formatarMoeda(valor)}
+        </strong>
+
+        <br>
+
+        Desconto:
+        <strong>
+            ${formatarMoeda(valorDesconto)}
+        </strong>
+
+        <br>
+
+        Valor final:
+        <strong>
+            ${formatarMoeda(total)}
+        </strong>
+    `;
+}
+
+// =====================================
+// CONSULTA DE CEP
+// =====================================
+
+async function buscarCEP() {
+
+    let cep =
+        document.getElementById(
+            "cep-input"
+        ).value;
+
+    cep = cep.replace(/\D/g, "");
+
+    const endereco =
+        document.getElementById(
+            "endereco"
+        );
+
+    if (cep.length !== 8) {
+
+        endereco.innerHTML =
+            "Digite um CEP válido com 8 números.";
+
+        return;
+    }
+
+    try {
+
+        endereco.innerHTML =
+            "Consultando CEP...";
+
+        const resposta = await fetch(
+            `https://viacep.com.br/ws/${cep}/json/`
+        );
+
+        const dados =
+            await resposta.json();
+
+        if (dados.erro) {
+
+            endereco.innerHTML =
+                "CEP não encontrado.";
+
+            return;
+        }
+
+        endereco.innerHTML = `
+            <strong>Endereço encontrado:</strong>
+
+            <br>
+
+            ${dados.logradouro || ""}
+
+            <br>
+
+            ${dados.bairro || ""}
+
+            <br>
+
+            ${dados.localidade} - ${dados.uf}
+
+            <br>
+
+            CEP: ${dados.cep}
+        `;
+
+    } catch (erro) {
+
+        endereco.innerHTML =
+            "Erro ao consultar o CEP.";
+
+    }
+}
+
+// =====================================
+// FORMATAR VALORES
+// =====================================
+
+function formatarMoeda(valor) {
+
+    return Number(valor).toLocaleString(
+        "pt-BR",
+        {
+            style: "currency",
+            currency: "BRL"
+        }
+    );
+}
