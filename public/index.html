@@ -1,397 +1,223 @@
-<!DOCTYPE html>
+//<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-    <title>Parfum féminin - Gestão de Vendas</title>
+  <title>
+    Sistema de Gestão de Vendas
+  </title>
 
-    <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
 
 <body>
 
-<header>
+  <header>
     <h1>Parfum féminin</h1>
 
     <p>
-        Sistema de Gestão de Vendas
+      Sistema de Gestão de Vendas - Parte 2
     </p>
+  </header>
 
-    <nav>
-        <a href="#catalogo">Catálogo</a>
-        <a href="#gerenciar-produtos">Produtos</a>
-        <a href="#gerenciar-pedidos">Pedidos</a>
-        <a href="#desconto">Desconto</a>
-        <a href="#cep">CEP</a>
-    </nav>
-</header>
+  <main>
 
-<main>
+    <section>
+      <h2>Produtos</h2>
 
-    <!-- CATÁLOGO -->
+      <p id="media">
+        Calculando média...
+      </p>
 
-    <section id="catalogo">
-        <h2>Catálogo de Perfumes</h2>
-
-        <p class="descricao">
-            Produtos carregados em tempo real através da nossa API.
-        </p>
-
-        <div id="lista-catalogo" class="catalogo"></div>
+      <div id="catalogo"></div>
     </section>
 
+    <section>
+      <h2>Cadastrar Produto</h2>
 
-    <!-- CRUD PRODUTOS -->
+      <form id="formProduto">
 
-    <section id="gerenciar-produtos">
+        <label>
+          Nome
+          <input
+            id="produtoNome"
+            required
+          >
+        </label>
+        <label>
+          Preço
+          <input
+            id="produtoPreco"
+            type="number"
+            step="0.01"
+            required
+          >
+        </label>
 
-        <h2>Gerenciamento de Produtos</h2>
+        <label>
+          Categoria
+          <input
+            id="produtoCategoria"
+            value="Perfume feminino"
+          >
+        </label>
 
-        <div class="formulario-container">
+        <label>
+          Concentração
 
-            <h3 id="titulo-form-produto">
-                Cadastrar Produto
-            </h3>
+          <select id="produtoConcentracao">
+            <option>Eau de Parfum</option>
 
-            <form id="form-produto">
+            <option>Eau de Toilette</option>
 
-                <input
-                    type="hidden"
-                    id="produto-id"
-                >
+            <option>Parfum</option>
+          </select>
+        </label>
 
-                <label for="produto-nome">
-                    Nome:
-                </label>
+        <label>
+          URL da imagem
+          <input id="produtoImagem">
+        </label>
 
-                <input
-                    type="text"
-                    id="produto-nome"
-                    placeholder="Nome do perfume"
-                    required
-                >
+        <button type="submit">
+          Cadastrar
+        </button>
 
-                <label for="produto-preco">
-                    Preço:
-                </label>
+      </form>
 
-                <input
-                    type="number"
-                    id="produto-preco"
-                    placeholder="Ex: 399.90"
-                    min="0"
-                    step="0.01"
-                    required
-                >
-
-                <label for="produto-categoria">
-                    Categoria:
-                </label>
-
-                <input
-                    type="text"
-                    id="produto-categoria"
-                    value="Perfume feminino"
-                    required
-                >
-
-                <label for="produto-estoque">
-                    Estoque:
-                </label>
-
-                <input
-                    type="number"
-                    id="produto-estoque"
-                    placeholder="Quantidade"
-                    min="0"
-                    required
-                >
-
-                <label for="produto-imagem">
-                    URL da imagem:
-                </label>
-
-                <input
-                    type="url"
-                    id="produto-imagem"
-                    placeholder="https://..."
-                >
-
-                <div class="botoes-form">
-
-                    <button type="submit">
-                        Salvar Produto
-                    </button>
-
-                    <button
-                        type="button"
-                        id="cancelar-edicao-produto"
-                        class="botao-secundario"
-                        onclick="cancelarEdicaoProduto()"
-                    >
-                        Cancelar edição
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-
-        <h3>Produtos cadastrados</h3>
-
-        <div class="tabela-container">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Produto</th>
-                        <th>Preço</th>
-                        <th>Categoria</th>
-                        <th>Estoque</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody id="tabela-produtos">
-                </tbody>
-
-            </table>
-
-        </div>
-
+      <p id="produtoMsg"></p>
     </section>
 
+    <section>
+      <h2>Calculadora de Desconto</h2>
 
-    <!-- CRUD PEDIDOS -->
+      <form id="formDesconto">
 
-    <section id="gerenciar-pedidos">
+        <label>
+          Valor da compra
 
-        <h2>Gerenciamento de Pedidos</h2>
+          <input
+            id="valor"
+            type="number"
+            step="0.01"
+            required
+          >
+        </label>
 
-        <div class="formulario-container">
+        <label>
+          Desconto %
 
-            <h3 id="titulo-form-pedido">
-                Cadastrar Pedido
-            </h3>
+          <input
+            id="desconto"
+            type="number"
+            required
+          >
+        </label>
 
-            <form id="form-pedido">
+        <button type="submit">
+          Calcular
+        </button>
 
-                <input
-                    type="hidden"
-                    id="pedido-id"
-                >
+      </form>
 
-                <label for="pedido-cliente">
-                    Cliente:
-                </label>
-
-                <input
-                    type="text"
-                    id="pedido-cliente"
-                    placeholder="Nome do cliente"
-                    required
-                >
-
-                <label for="pedido-produto">
-                    Produto:
-                </label>
-
-                <select
-                    id="pedido-produto"
-                    required
-                >
-                    <option value="">
-                        Selecione um produto
-                    </option>
-                </select>
-
-                <label for="pedido-quantidade">
-                    Quantidade:
-                </label>
-
-                <input
-                    type="number"
-                    id="pedido-quantidade"
-                    min="1"
-                    value="1"
-                    required
-                >
-
-                <label for="pedido-status">
-                    Status:
-                </label>
-
-                <select id="pedido-status">
-
-                    <option value="Pendente">
-                        Pendente
-                    </option>
-
-                    <option value="Em preparação">
-                        Em preparação
-                    </option>
-
-                    <option value="Enviado">
-                        Enviado
-                    </option>
-
-                    <option value="Concluído">
-                        Concluído
-                    </option>
-
-                    <option value="Cancelado">
-                        Cancelado
-                    </option>
-
-                </select>
-
-                <div class="botoes-form">
-
-                    <button type="submit">
-                        Salvar Pedido
-                    </button>
-
-                    <button
-                        type="button"
-                        class="botao-secundario"
-                        onclick="cancelarEdicaoPedido()"
-                    >
-                        Cancelar edição
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-
-        <h3>Pedidos cadastrados</h3>
-
-        <div class="tabela-container">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Produto</th>
-                        <th>Qtd.</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody id="tabela-pedidos">
-                </tbody>
-
-            </table>
-
-        </div>
-
+      <p id="resultado"></p>
     </section>
 
+    <section>
+      <h2>Consultar CEP</h2>
 
-    <!-- DESCONTO -->
+      <form id="formCep">
 
-    <section id="desconto">
+        <label>
+          CEP
 
-        <h2>Calculadora de Desconto</h2>
+          <input
+            id="cep"
+            maxlength="9"
+            required
+          >
+        </label>
 
-        <div class="ferramenta">
+        <button type="submit">
+          Consultar
+        </button>
 
-            <label for="valor">
-                Valor da compra:
-            </label>
+      </form>
 
-            <input
-                type="number"
-                id="valor"
-                placeholder="Valor da compra"
-                min="0"
-                step="0.01"
-            >
-
-            <label for="desconto-valor">
-                Desconto (%):
-            </label>
-
-            <input
-                type="number"
-                id="desconto-valor"
-                placeholder="Desconto"
-                min="0"
-                max="100"
-            >
-
-            <button onclick="calcularDesconto()">
-                Calcular
-            </button>
-
-            <p id="resultado"></p>
-
-        </div>
-
+      <div id="endereco"></div>
     </section>
 
+    <section>
+      <h2>Criar Pedido</h2>
 
-    <!-- CEP -->
+      <form id="formPedido">
 
-    <section id="cep">
+        <label>
+          Cliente
 
-        <h2>Consultar CEP</h2>
+          <input
+            id="cliente"
+            required
+          >
+        </label>
 
-        <div class="ferramenta">
+        <label>
+          CEP
 
-            <label for="cep-input">
-                CEP:
-            </label>
+          <input
+            id="pedidoCep"
+            required
+          >
+        </label>
 
-            <input
-                type="text"
-                id="cep-input"
-                placeholder="Ex: 89000000"
-                maxlength="9"
-            >
+        <label>
+          Produto
 
-            <button onclick="buscarCEP()">
-                Buscar
-            </button>
+          <select
+            id="pedidoProduto"
+            required
+          ></select>
+        </label>
 
-            <div id="endereco"></div>
+        <label>
+          Quantidade
 
-        </div>
+          <input
+            id="quantidade"
+            type="number"
+            min="1"
+            value="1"
+            required
+          >
+        </label>
 
+        <button type="submit">
+          Salvar Pedido
+        </button>
+
+      </form>
+
+      <div id="pedidoMsg"></div>
     </section>
 
-</main>
+    <section>
+      <h2>Pedidos Salvos</h2>
 
+      <div id="pedidos"></div>
+    </section>
 
-<footer>
+  </main>
 
-    <p>
-        Parfum féminin - Sistema de Gestão de Vendas
-    </p>
-
-    <p>
-        Atividade 3 - Node.js, Express, API REST e MVC
-    </p>
-
-</footer>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
 
